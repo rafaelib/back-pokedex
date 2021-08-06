@@ -28,12 +28,6 @@ export async function signIn(user: NewUser): Promise<string> {
 
   console.log(user);
 
-  /*console.log(
-    bcrypt.compareSync(user.password, existentUser.password),
-    user.password,
-    existentUser.password
-  );*/
-
   if (bcrypt.compareSync(user.password, existentUser.password)) {
     const token = uuid();
     await getRepository(Session).insert({ userId: existentUser.id, token });
