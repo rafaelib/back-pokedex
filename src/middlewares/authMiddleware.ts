@@ -8,7 +8,6 @@ export default async function authMiddleware(
   next: NextFunction
 ) {
   const authorization = req.headers["authorization"];
-  console.log(authorization);
   if (!authorization) return res.sendStatus(401);
   const token = authorization.split(" ")[1];
   if (!token) return res.sendStatus(401);

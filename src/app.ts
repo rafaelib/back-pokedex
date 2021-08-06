@@ -13,6 +13,10 @@ import * as pokemonController from "./controllers/pokemonController";
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err);
+  res.sendStatus(500);
+});
 
 app.post("/sign-up", userController.makeUser);
 app.post("/sign-in", userController.signIn);
@@ -27,11 +31,6 @@ app.post(
   authMiddleware,
   pokemonController.unflagNewPokemon
 );
-
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.log(err);
-  return res.sendStatus(500);
-});
 
 export async function init() {
   await connectDatabase();

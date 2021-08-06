@@ -1,7 +1,4 @@
 import supertest from "supertest";
-import { getConnection } from "typeorm";
-import { getRepository } from "typeorm";
-import User from "../../src/entities/User";
 
 import app, { init } from "../../src/app";
 import {

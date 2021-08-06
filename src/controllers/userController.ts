@@ -27,7 +27,6 @@ export async function signIn(req: Request, res: Response) {
   });
 
   if (result === null) return res.sendStatus(401);
-  console.log(typeof result);
 
   res.send(result);
 }
