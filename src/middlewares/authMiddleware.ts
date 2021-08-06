@@ -7,12 +7,10 @@ export default async function authMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  console.log("authMiddleware");
-  const header = req.header(`Authorization`);
-  if (!header) {
-    return res.sendStatus(401);
-  }
-  const token = header.split("Bearer ")[1];
+  const authorization = req.headers["authorization"];
+  console.log(authorization);
+  if (!authorization) return res.sendStatus(401);
+  const token = authorization.split(" ")[1];
   if (!token) return res.sendStatus(401);
   const user = await getRepository(Session).findOne({ token });
   if (!user) return res.status(401).send("Invalid token");

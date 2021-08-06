@@ -1,36 +1,85 @@
 import supertest from "supertest";
 import { getConnection } from "typeorm";
+import { getRepository } from "typeorm";
+import User from "../../src/entities/User";
 
 import app, { init } from "../../src/app";
-import { createUser } from "../factories/userFactory";
-import { clearDatabase } from "../utils/database";
+import {
+  createUser,
+  insertUser,
+  insertFormatedUser,
+} from "../factories/userFactory";
+import { resetDatabase, endConnection } from "../utils/database";
 
 beforeAll(async () => {
   await init();
 });
 
 beforeEach(async () => {
-  await clearDatabase();
+  await resetDatabase();
 });
 
 afterAll(async () => {
-  await getConnection().close();
+  await endConnection();
 });
 
-describe("GET /users", () => {
-  it("should answer with text \"OK!\" and status 200", async () => {
-    const user = await createUser();
+const agent = supertest(app);
 
-    const response = await supertest(app).get("/users");
-    
-    expect(response.body).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          email: user.email
-        })
-      ])
-    );
+describe("POST /sign-up", () => {
+  it("should return 201 for valid params", async () => {
+    const newUser = await createUser();
+    const result = await agent.post("/sign-up").send(newUser);
+    expect(result.status).toEqual(201);
+  });
+  it("should return 400 for invalid email", async () => {
+    const newUser = await createUser();
+    newUser.email = "banana";
+    const result = await agent.post("/sign-up").send(newUser);
+    expect(result.status).toEqual(400);
+  });
+  it("should return 400 for not matching passwords", async () => {
+    const newUser = await createUser();
+    newUser.confirmPassword = "banana";
+    const result = await agent.post("/sign-up").send(newUser);
+    expect(result.status).toEqual(400);
+  });
+  it("should return 409 for already registered email", async () => {
+    const existentUser = await insertUser();
+    const newUser = { ...existentUser, confirmPassword: existentUser.password };
+    const result = await agent.post("/sign-up").send(newUser);
+    expect(result.status).toEqual(409);
+  });
+});
 
-    expect(response.status).toBe(200);
+describe("POST /sign-in", () => {
+  it("should return 200 for valid params", async () => {
+    const result = await insertFormatedUser();
+    expect(result.status).toEqual(200);
+  });
+
+  it("should return a token for valid params", async () => {
+    const result = await insertFormatedUser();
+    expect(result.text.length).toEqual(36);
+  });
+
+  it("should return 400 for invalid password", async () => {
+    const newUser = await insertUser();
+    newUser.password = "aa";
+    const result = await agent.post("/sign-in").send(newUser);
+    expect(result.status).toEqual(400);
+  });
+
+  it("should return 400 for invalid email", async () => {
+    const newUser = await insertUser();
+    newUser.email = "aa";
+    const result = await agent.post("/sign-in").send(newUser);
+    expect(result.status).toEqual(400);
+  });
+
+  it("should return 401 for no matching email", async () => {
+    const newUser = await insertUser();
+    newUser.email = "bananasdepijamas@gmail.com";
+    const result = await agent.post("/sign-in").send(newUser);
+    expect(result.status).toEqual(401);
   });
 });

@@ -37,3 +37,18 @@ export async function flagNewPokemon(
     return true;
   }
 }
+
+export async function unflagNewPokemon(
+  userId: number,
+  pokemonId: number
+): Promise<boolean> {
+  const result = await getRepository(PokemonsUsers).findOne({
+    where: { userId, pokemonId },
+  });
+  if (result) {
+    await getRepository(PokemonsUsers).remove(result);
+    return true;
+  } else {
+    return false;
+  }
+}

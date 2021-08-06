@@ -26,8 +26,6 @@ export async function signIn(user: NewUser): Promise<string> {
 
   if (!existentUser) return null;
 
-  console.log(user);
-
   if (bcrypt.compareSync(user.password, existentUser.password)) {
     const token = uuid();
     await getRepository(Session).insert({ userId: existentUser.id, token });
