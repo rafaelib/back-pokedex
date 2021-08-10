@@ -1,4 +1,4 @@
-# Pokèdex API
+# Pokédex API
 
 An app that helps you catch'em all.
 
